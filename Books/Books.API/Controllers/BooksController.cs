@@ -1,4 +1,5 @@
-﻿using Books.API.Services;
+﻿using Books.API.Filters;
+using Books.API.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Books.API.Controllers;
@@ -16,6 +17,7 @@ public class BooksController : ControllerBase
     }
 
     [HttpGet("books")]
+    [TypeFilter(typeof(BooksResultFilter))]
     public async Task<IActionResult> GetBooks()
     {
         var bookEntities = await _booksRepository.GetBooksAsync();
@@ -23,6 +25,7 @@ public class BooksController : ControllerBase
     }
 
     [HttpGet("books/{id}")]
+    [TypeFilter(typeof(BookResultFilter))]
     public async Task<IActionResult> GetBook(Guid id)
     {
         var bookEntity = await _booksRepository.GetBookAsync(id);
