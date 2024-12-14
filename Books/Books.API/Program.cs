@@ -6,6 +6,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+// Throttle the thread pool (set available threads to amount of processors)
+ThreadPool.SetMaxThreads(Environment.ProcessorCount, Environment.ProcessorCount);
+
 builder.Services.AddControllers();
 
 // register the DbContext on the container 
