@@ -15,5 +15,11 @@ public class BooksProfile : Profile
              string.Empty,
              src.Title,
              src.Description));
+
+        CreateMap<BookForCreationDto, Book>()
+         .ConstructUsing(src => new Book(Guid.NewGuid(),
+                src.AuthorId,
+                src.Title,
+                src.Description));
     }
 }

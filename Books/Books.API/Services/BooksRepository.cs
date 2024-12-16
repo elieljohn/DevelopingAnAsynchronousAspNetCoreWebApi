@@ -14,6 +14,16 @@ public class BooksRepository : IBooksRepository
             throw new ArgumentNullException(nameof(context));
     }
 
+    public void AddBook(Book bookToAdd)
+    {
+        if (bookToAdd == null)
+        {
+            throw new ArgumentNullException(nameof(bookToAdd));
+        }
+
+        _context.Add(bookToAdd);
+    }
+
     public async Task<Book?> GetBookAsync(Guid id)
     {
         return await _context.Books
@@ -33,5 +43,11 @@ public class BooksRepository : IBooksRepository
         return await _context.Books
             .Include(b => b.Author)
             .ToListAsync();
+    }
+
+    public async Task<bool> SaveChangesAsync()
+    {
+        // return true if 1 or more entities were changed
+        return (await _context.SaveChangesAsync() > 0);
     }
 }
