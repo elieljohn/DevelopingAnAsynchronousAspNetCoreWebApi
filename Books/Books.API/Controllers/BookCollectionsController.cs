@@ -1,8 +1,11 @@
 ﻿using AutoMapper;
 using Books.API.Filters;
+using Books.API.Helpers;
 using Books.API.Models;
 using Books.API.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 
 namespace Books.API.Controllers;
 
@@ -35,6 +38,29 @@ public class BookCollectionsController : ControllerBase
 
         await _booksRepository.SaveChangesAsync();
 
-        return Ok();
+        var booksToReturn = await _booksRepository.GetBooksAsync(
+            bookEntities.Select(b => b.Id).ToList());
+        var bookIds = string.Join(",", booksToReturn.Select(a => a.Id));
+
+        return CreatedAtRoute("GetBookCollection",
+              new { bookIds },
+              booksToReturn);
+    }
+
+
+    // api/bookcollections/(id1,id2, … )
+    [HttpGet("({bookIds})", Name = "GetBookCollection")]
+    public async Task<IActionResult> GetBookCollection(
+        [ModelBinder(BinderType = typeof(ArrayModelBinder))]
+        IEnumerable<Guid> bookIds)
+    {
+        var bookEntities = await _booksRepository.GetBooksAsync(bookIds);
+
+        if (bookIds.Count() != bookEntities.Count())
+        {
+            return NotFound();
+        }
+
+        return Ok(bookEntities);
     }
 }
