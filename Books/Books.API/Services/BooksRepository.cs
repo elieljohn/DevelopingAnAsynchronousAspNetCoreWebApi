@@ -45,6 +45,11 @@ public class BooksRepository : IBooksRepository
             .ToListAsync();
     }
 
+    public IAsyncEnumerable<Book> GetBooksAsAsyncEnumerable()
+    {
+        return _context.Books.AsAsyncEnumerable<Book>();
+    }
+
     public async Task<IEnumerable<Book>> GetBooksAsync(IEnumerable<Guid> bookIds)
     {
         return await _context.Books
