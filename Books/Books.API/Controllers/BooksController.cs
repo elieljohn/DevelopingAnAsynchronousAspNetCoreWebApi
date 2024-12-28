@@ -44,7 +44,7 @@ public class BooksController : ControllerBase
     }
 
     [HttpGet("books/{id}", Name = "GetBook")]
-    [TypeFilter(typeof(BookResultFilter))]
+    [TypeFilter(typeof(BookWithCoversResultFilter))]
     public async Task<IActionResult> GetBook(Guid id)
     {
         var bookEntity = await _booksRepository.GetBookAsync(id);
@@ -62,8 +62,7 @@ public class BooksController : ControllerBase
         var bookCovers = await _booksRepository.
             GetBookCoversProcessAfterWaitForAllAsync(id);
 
-
-        return Ok(bookEntity);
+        return Ok((bookEntity, bookCovers));
     }
 
     [HttpPost("books")]
