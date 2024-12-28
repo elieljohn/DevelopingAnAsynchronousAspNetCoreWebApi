@@ -30,6 +30,9 @@ public class BookWithCoversResultFilter : IAsyncResultFilter
             ((Entities.Book book,
             IEnumerable<Models.External.BookCoverDto> bookCovers))resultFromAction.Value;
 
+        var mappedBook = _mapper.Map<BookWithCoversDto>(book);
+        resultFromAction.Value = _mapper.Map(bookCovers, mappedBook);
+
         await next();
     }
 }
