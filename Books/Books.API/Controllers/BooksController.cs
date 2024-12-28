@@ -3,6 +3,7 @@ using Books.API.Filters;
 using Books.API.Models;
 using Books.API.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading;
 
 namespace Books.API.Controllers;
 
@@ -52,8 +53,11 @@ public class BooksController : ControllerBase
             return NotFound();
         }
 
-        var bookCover = await _booksRepository
-            .GetBookCoverAsync("dummycover");
+        //var bookCover = await _booksRepository
+        //    .GetBookCoverAsync("dummycover");
+
+        var bookCovers = await _booksRepository.
+            GetBookCoversProcessOneByOneAsync(id);
 
         
         return Ok(bookEntity);
