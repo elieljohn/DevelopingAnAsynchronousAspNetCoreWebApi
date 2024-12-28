@@ -11,6 +11,8 @@ ThreadPool.SetMaxThreads(Environment.ProcessorCount, Environment.ProcessorCount)
 
 builder.Services.AddControllers();
 
+builder.Services.AddHttpClient();
+
 // register the DbContext on the container 
 builder.Services.AddDbContext<BooksContext>(options =>
     options.UseSqlite(

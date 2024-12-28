@@ -8,6 +8,7 @@ public interface IBooksRepository
     Task<IEnumerable<Entities.Book>> GetBooksAsync();
     IAsyncEnumerable<Entities.Book> GetBooksAsAsyncEnumerable();
     Task<Entities.Book?> GetBookAsync(Guid id);
+    Task<Models.External.BookCoverDto?> GetBookCoverAsync(string id);
     void AddBook(Entities.Book bookToAdd);
     Task<bool> SaveChangesAsync();
 }

@@ -1,17 +1,23 @@
 ﻿using Books.API.DbContexts;
 using Books.API.Entities;
+using Books.API.Models.External;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace Books.API.Services;
 
 public class BooksRepository : IBooksRepository
 {
     private readonly BooksContext _context;
+    private readonly IHttpClientFactory _httpClientFactory;
 
-    public BooksRepository(BooksContext context)
+    public BooksRepository(BooksContext context,
+        IHttpClientFactory httpClientFactory)
     {
         _context = context ??
             throw new ArgumentNullException(nameof(context));
+        _httpClientFactory = httpClientFactory ??
+            throw new ArgumentNullException(nameof(httpClientFactory));
     }
 
     public void AddBook(Book bookToAdd)
@@ -29,6 +35,26 @@ public class BooksRepository : IBooksRepository
         return await _context.Books
             .Include(b => b.Author)
             .FirstOrDefaultAsync(b => b.Id == id);
+    }
+
+    public async Task<BookCoverDto?> GetBookCoverAsync(string id)
+    {
+        var httpClient = _httpClientFactory.CreateClient();
+
+        // pass through a dummy name
+        var response = await httpClient
+               .GetAsync($"http://localhost:52644/api/bookcovers/{id}");
+        if (response.IsSuccessStatusCode)
+        {
+            return JsonSerializer.Deserialize<Models.External.BookCoverDto>(
+                await response.Content.ReadAsStringAsync(),
+                new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                });
+        }
+
+        return null;
     }
 
     public IEnumerable<Book> GetBooks()
