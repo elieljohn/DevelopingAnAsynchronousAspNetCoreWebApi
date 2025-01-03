@@ -58,7 +58,8 @@ public class BooksRepository : IBooksRepository
     }
 
     public async Task<IEnumerable<Models.External.BookCoverDto>> GetBookCoversProcessOneByOneAsync(
-    Guid bookId)
+        Guid bookId,
+        CancellationToken cancellationToken)
     {
         var httpClient = _httpClientFactory.CreateClient();
         var bookCovers = new List<Models.External.BookCoverDto>();
@@ -80,13 +81,13 @@ public class BooksRepository : IBooksRepository
             {
                 var response = await httpClient
                     .GetAsync(bookCoverUrl,
-                    cancellationTokenSource.Token);
+                    cancellationToken);
 
                 if (response.IsSuccessStatusCode)
                 {
                     var bookCover = JsonSerializer.Deserialize<Models.External.BookCoverDto>(
                         await response.Content.ReadAsStringAsync(
-                            cancellationTokenSource.Token),
+                            cancellationToken),
                             new JsonSerializerOptions
                             {
                                 PropertyNameCaseInsensitive = true,
