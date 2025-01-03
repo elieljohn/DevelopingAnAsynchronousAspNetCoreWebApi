@@ -73,24 +73,33 @@ public class BooksRepository : IBooksRepository
             $"http://localhost:52644/api/bookcovers/{bookId}-dummycover5"
         };
 
-        // fire tasks & process them one by one
-        foreach (var bookCoverUrl in bookCoverUrls)
+        using (var cancellationTokenSource = new CancellationTokenSource())
         {
-            var response = await httpClient
-                .GetAsync(bookCoverUrl);
-
-            if (response.IsSuccessStatusCode)
+            // fire tasks & process them one by one
+            foreach (var bookCoverUrl in bookCoverUrls)
             {
-                var bookCover = JsonSerializer.Deserialize<Models.External.BookCoverDto>(
-                    await response.Content.ReadAsStringAsync(),
-                    new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true,
-                    });
+                var response = await httpClient
+                    .GetAsync(bookCoverUrl,
+                    cancellationTokenSource.Token);
 
-                if (bookCover != null)
+                if (response.IsSuccessStatusCode)
                 {
-                    bookCovers.Add(bookCover);
+                    var bookCover = JsonSerializer.Deserialize<Models.External.BookCoverDto>(
+                        await response.Content.ReadAsStringAsync(
+                            cancellationTokenSource.Token),
+                            new JsonSerializerOptions
+                            {
+                                PropertyNameCaseInsensitive = true,
+                            });
+
+                    if (bookCover != null)
+                    {
+                        bookCovers.Add(bookCover);
+                    }
+                }
+                else
+                {
+                    cancellationTokenSource.Cancel();
                 }
             }
         }
