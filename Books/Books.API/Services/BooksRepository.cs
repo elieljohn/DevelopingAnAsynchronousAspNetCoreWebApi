@@ -67,44 +67,48 @@ public class BooksRepository : IBooksRepository
         // create a list of fake bookcovers
         var bookCoverUrls = new[]
         {
-            $"http://localhost:52644/api/bookcovers/{bookId}-dummycover1",
-            $"http://localhost:52644/api/bookcovers/{bookId}-dummycover2?returnFault=true",
-            $"http://localhost:52644/api/bookcovers/{bookId}-dummycover3",
-            $"http://localhost:52644/api/bookcovers/{bookId}-dummycover4",
-            $"http://localhost:52644/api/bookcovers/{bookId}-dummycover5"
-        };
+                $"http://localhost:52644/api/bookcovers/{bookId}-dummycover1",
+                $"http://localhost:52644/api/bookcovers/{bookId}-dummycover2?returnFault=true",
+                $"http://localhost:52644/api/bookcovers/{bookId}-dummycover3",
+                $"http://localhost:52644/api/bookcovers/{bookId}-dummycover4",
+                $"http://localhost:52644/api/bookcovers/{bookId}-dummycover5"
+            };
 
         using (var cancellationTokenSource = new CancellationTokenSource())
         {
-            // fire tasks & process them one by one
-            foreach (var bookCoverUrl in bookCoverUrls)
+            using (var linkedCancellationTokenSource =
+              CancellationTokenSource.CreateLinkedTokenSource(
+                  cancellationTokenSource.Token, cancellationToken))
             {
-                var response = await httpClient
-                    .GetAsync(bookCoverUrl,
-                    cancellationToken);
-
-                if (response.IsSuccessStatusCode)
+                // fire tasks & process them one by one
+                foreach (var bookCoverUrl in bookCoverUrls)
                 {
-                    var bookCover = JsonSerializer.Deserialize<Models.External.BookCoverDto>(
-                        await response.Content.ReadAsStringAsync(
-                            cancellationToken),
-                            new JsonSerializerOptions
-                            {
-                                PropertyNameCaseInsensitive = true,
-                            });
+                    var response = await httpClient
+                       .GetAsync(bookCoverUrl,
+                       linkedCancellationTokenSource.Token);
 
-                    if (bookCover != null)
+                    if (response.IsSuccessStatusCode)
                     {
-                        bookCovers.Add(bookCover);
+                        var bookCover = JsonSerializer.Deserialize<Models.External.BookCoverDto>(
+                            await response.Content.ReadAsStringAsync(
+                                linkedCancellationTokenSource.Token),
+                                new JsonSerializerOptions
+                                {
+                                    PropertyNameCaseInsensitive = true,
+                                });
+
+                        if (bookCover != null)
+                        {
+                            bookCovers.Add(bookCover);
+                        }
                     }
-                }
-                else
-                {
-                    cancellationTokenSource.Cancel();
+                    else
+                    {
+                        cancellationTokenSource.Cancel();
+                    }
                 }
             }
         }
-
         return bookCovers;
     }
 
